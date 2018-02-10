@@ -26,7 +26,7 @@ const normalizeOption = ({ order: originOrder, groups = {} }) => {
         // defualt matches moduleName      
         if (typeof group === 'string') {
             return {
-
+                
             }
         }
     })
