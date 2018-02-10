@@ -9,17 +9,7 @@
 //------------------------------------------------------------------------------
 
 // var requireIndex = require("requireindex");
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.rules = undefined;
-
-var _requireindex = require("requireindex");
-
-var _requireindex2 = _interopRequireDefault(_requireindex);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+import requireIndex from 'requireindex'
 
 //------------------------------------------------------------------------------
 // Plugin Definition
@@ -27,4 +17,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 
 // import all rules in lib/rules
-var rules = exports.rules = (0, _requireindex2.default)(__dirname + "/rules");
+export const rules = requireIndex(__dirname + "/rules");
+
+
+
