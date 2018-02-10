@@ -32,7 +32,7 @@ const normalizeOption = ({ order: originOrder, groups = {} }) => {
     })
 }
 
-module.exports = {
+export default {
     meta: {
         docs: {
             description: 'test',
