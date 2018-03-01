@@ -6,33 +6,20 @@ const defaultSettings = {
                 match: '',
                 sorter: 'byName'
             },
-            'module': '',
+            moduleName: '',
             separator: true,
         }
     }
 }
 
-const normalizeOption = ({ order: originOrder, groups = {} }) => {
-    const order = [...originOrder]
-    
-    Object.keys(option.groups || {}).forEach(key => {
-        const index = order.indexOf(key)
-        if (~index) {
-            order.splice(index, 1, groups[key])
-        }
-    })
-
-    return order.map(group => {
-        // defualt matches moduleName      
-        if (typeof group === 'string') {
-            return {
-                
-            }
-        }
-    })
+const normalizeOption = ({ order, groups = {} }) => {
+    const groupKeys = Object.keys(groups)
+    return order.map(str => groupKeys.includes(str) ? groups[str] : ({
+        moduleName: str
+    }))
 }
 
-export default {
+module.exports = {
     meta: {
         docs: {
             description: 'test',
@@ -42,13 +29,13 @@ export default {
         schema: [],
         fixable: null
     },
-    create: function(context) {
+    create(context) {
         var importNodes = []
         return {
-            ImportDeclaration: function(node) {
+            ImportDeclaration(node) {
                 importNodes.push(node)
             },
-            onCodePathEnd: function(codePath, node) {
+            'Program:exit'() {
                 var moduleNames = importNodes.map(node => node.source.value)
                 for (var i = 0; i < moduleNames.length - 1; i++) {
                     if (moduleNames[i] > moduleNames[i + 1]) {
