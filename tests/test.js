@@ -10,37 +10,43 @@ const options = [{
     order: ['a', 'b', 'c'],
     groups: {
         a: {
-            memberSorter: 'byUsingOrder',
+            member: 'byUsingOrder',
             sorter: 'byType',
             match: 'd',
             separator: true,
         }
     },
     defaultSetting: {
-        memberSorter: 'byUsingOrder',
-        sorter: 'byName',
+        member: 'byUsingOrder',
+        group: 'byName',
         separator: false
     }
 }]
 
 ruleTester.run('test', rule, {
     valid: [{
-        code: `import a from 
-            'd'
-            import {b, c} from 'c'`,
+        code: 
+`import a from 
+ 'd'
+import {b, c} from 'c'`,
         parserOptions,
         options
     }],
     invalid: [{
-        code: `import a from 'c'
-            import v from 'd'`.trim(),
+        code: 
+`import a from 'c'
+import v from 'd'
+
+var aa = 123`.trim(),
         errors: [{
             message: 'group `c` should be placed after group `a`',
             type: 'ImportDeclaration'
         }],
         output: 
 `import v from 'd'
-import a from 'c'`,
+import a from 'c'
+
+var aa = 123`,
         parserOptions,
         options
     }]
