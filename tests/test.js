@@ -1,3 +1,4 @@
+const requireIndex = require('requireindex')
 const rule = require('../lib/rules/order')
 const RuleTester = require('eslint').RuleTester
 
@@ -23,32 +24,24 @@ const options = [{
     }
 }]
 
+const cases = Object.values(requireIndex(__dirname + '/cases'))
+
 ruleTester.run('test', rule, {
-    valid: [{
-        code: 
-`import a from 
- 'd'
-import {b, c} from 'c'`,
-        parserOptions,
-        options
-    }],
-    invalid: [{
-        code: 
-`import a from 'c'
-import v from 'd'
-
-var aa = 123`.trim(),
-        errors: [{
-            message: 'group `c` should be placed after group `a`',
-            type: 'ImportDeclaration'
-        }],
-        output: 
-`import v from 'd'
-
-import a from 'c'
-
-var aa = 123`,
-        parserOptions,
-        options
-    }]
+    valid: cases.map(_case => _case.valid)
+            .map(code => ({
+                code: code.trim(),
+                parserOptions,
+                options
+            })),
+    invalid: cases.map(_case => _case.invalid)
+            .map(([code, output, messages]) => ({
+                code: code.trim(),
+                output: output.trim(),
+                errors: messages.map(message => ({
+                    message,
+                    type: 'ImportDeclaration'
+                })),
+                parserOptions,
+                options
+            }))
 })

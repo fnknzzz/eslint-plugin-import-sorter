@@ -1,32 +1,32 @@
 {
-  "name": "eslint-plugin-import-sorter",
-  "version": "0.0.0",
-  "description": "Auto fix the imports beginning in files",
-  "keywords": [
-    "eslint",
-    "eslintplugin",
-    "eslint-plugin"
-  ],
-  "author": "fengk",
-  "main": "lib/index.js",
-  "scripts": {
-    "build": "npx babel src --out-dir lib",
-    "test": "mocha tests --recursive"
-  },
-  "dependencies": {
-    "requireindex": "~1.1.0"
-  },
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-stage-0": "^6.24.1",
-    "eslint": "^4.17.0",
-    "eslint-config-airbnb": "^16.1.0",
-    "mocha": "^3.1.2"
-  },
-  "engines": {
-    "node": ">=0.10.0"
-  },
-  "license": "ISC"
+    "name": "eslint-plugin-import-sorter",
+    "version": "0.0.0",
+    "description": "Auto fix the imports beginning in files",
+    "keywords": [
+        "eslint",
+        "eslintplugin",
+        "eslint-plugin"
+    ],
+    "author": "fengk",
+    "main": "lib/index.js",
+    "scripts": {
+        "build": "npx babel src --out-dir lib",
+        "test": "mocha tests/test.js --recursive"
+    },
+    "dependencies": {
+        "requireindex": "~1.1.0"
+    },
+    "devDependencies": {
+        "babel-cli": "^6.26.0",
+        "babel-core": "^6.26.0",
+        "babel-preset-es2015": "^6.24.1",
+        "babel-preset-stage-0": "^6.24.1",
+        "eslint": "^4.17.0",
+        "eslint-config-airbnb": "^16.1.0",
+        "mocha": "^3.1.2"
+    },
+    "engines": {
+        "node": ">=0.10.0"
+    },
+    "license": "ISC"
 }

@@ -99,8 +99,13 @@ module.exports = {
         const originOptions = context.options[0]
         const options = normalizeOption(originOptions)
         const importNodes = []
+        let fixRangeEnd = 0
+        // mark as in the beginning of the source code
+        let beginningCodeFlag = true
         return {
-            ImportDeclaration(node) {
+            'Program > ImportDeclaration'(node) {
+                // ignore next ImportDeclaration
+                if (!beginningCodeFlag) return
                 const rank = options.findIndex(option => {
                     if (/^\/(.*)\/$/.test(option.match)) {
                         return (new RegExp(RegExp.$1)).test(node.source.value)
@@ -114,6 +119,12 @@ module.exports = {
                     rank,
                     errors: []
                 })
+            },
+            'Program > ImportDeclaration + :not(ImportDeclaration)'(node) {
+                if (!fixRangeEnd) {
+                    fixRangeEnd = node.range[0]
+                    beginningCodeFlag = false
+                }
             },
             'Program:exit'() {
                 const { lines } = sourceCode
@@ -157,7 +168,7 @@ module.exports = {
                 context.report({
                     ...getErrorReport(errorImportNodes[errorImportNodes.length - 1], originOptions.order),
                     fix(fixer) {
-                        const range = [0, importNodes[importNodes.length - 1].node.range[1]]
+                        const range = [0, fixRangeEnd]
                         const resultSourceCode = sortedGroups.map(
                             ({ nodes, option }) => {
                                 const groupSourceCode = nodes.map(
@@ -169,10 +180,11 @@ module.exports = {
                                 return groupSourceCode
                             }
                         ).join('\n')
-                        // console.log('--------')
-                        // console.log(resultSourceCode)
-
-                        return fixer.replaceTextRange(range, resultSourceCode)
+                        console.log('--------')
+                        console.log(resultSourceCode)
+                        console.log('--------')
+                        // forced seperator in the last ImportDeclaration
+                        return fixer.replaceTextRange(range, resultSourceCode + '\n\n')
                     }
                 })
             }
