@@ -158,10 +158,16 @@ module.exports = {
                     ...getErrorReport(errorImportNodes[errorImportNodes.length - 1], originOptions.order),
                     fix(fixer) {
                         const range = [0, importNodes[importNodes.length - 1].node.range[1]]
-                        // console.log(range)
-                        console.log(sortedGroups)
                         const resultSourceCode = sortedGroups.map(
-                            ({ nodes, option }) => nodes.map(node => sourceCode.getText(node)).join('\n') + (option.seperator ? '\n' : '')
+                            ({ nodes, option }) => {
+                                const groupSourceCode = nodes.map(
+                                    importNode => sourceCode.getText(importNode.node)
+                                ).join('\n')
+                                if (groupSourceCode.length && option.seperator) {
+                                    return groupSourceCode + '\n'
+                                }
+                                return groupSourceCode
+                            }
                         ).join('\n')
                         // console.log('--------')
                         // console.log(resultSourceCode)

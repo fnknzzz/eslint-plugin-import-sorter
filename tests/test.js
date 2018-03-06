@@ -44,6 +44,7 @@ var aa = 123`.trim(),
         }],
         output: 
 `import v from 'd'
+
 import a from 'c'
 
 var aa = 123`,
