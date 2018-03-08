@@ -1,14 +1,22 @@
 {
     "name": "eslint-plugin-import-sorter",
-    "version": "0.0.0",
-    "description": "Auto fix the imports beginning in files",
+    "version": "0.0.1",
+    "description": "Auto sort the import declarations",
     "keywords": [
         "eslint",
         "eslintplugin",
         "eslint-plugin"
     ],
-    "author": "fengk",
+    "author": "fengk (https://github.com/fengkfengk)",
     "main": "lib/index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/fengkfengk/eslint-plugin-import-sorter.git"
+    },
+    "bugs": {
+        "url": "https://github.com/fengkfengk/eslint-plugin-import-sorter/issues"
+    },
+    "homepage": "https://github.com/fengkfengk/import-sort-react-first#readme",
     "scripts": {
         "build": "npx babel src --out-dir lib",
         "test": "mocha tests/test.js --recursive",

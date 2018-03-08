@@ -98,6 +98,10 @@ import './index.css'
 var a = '1'
 ```
 
+## Next Plan
+
+Sort the `Specifiers` order.
+
 ## Supported Rules
 
 * order
