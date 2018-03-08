@@ -1,5 +1,5 @@
 {
-    "extends": "airbnb",
+    "extends": "airbnb-base",
     "plugins": [
         "babel"
     ],
@@ -25,6 +25,7 @@
         "no-unused-expressions": [2, {
             "allowShortCircuit": true
         }],
+        "no-plusplus": 0,
         "comma-dangle": [2, "only-multiline"],
         "linebreak-style": [2, "windows"],
         "semi": [2, "never"],
@@ -37,10 +38,7 @@
             "before": true,
             "after": true
         }],
-        "import/no-extraneous-dependencies": 0,
-        "import/extensions": 0,
-        "import/no-unresolved": 0,
-        "import/prefer-default-export": 1,
-        "import/first": 0
+        "object-shorthand": [2, "always"],
+        "radix": [2, "as-needed"]
     }
 }

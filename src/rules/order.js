@@ -6,8 +6,10 @@ const isRegExpMatcher = (() => {
 const findLoc = (option, node) => {
     let currentPrio = 0
     let temp = []
-    for (let [i, group] of option.entries()) {
-        for (let [j, { matcher, priority }] of group.entries()) {
+    for (let i = 0; i < option.length; i++) {
+        const group = option[i]
+        for (let j = 0; i < group.length; j++) {
+            const { matcher, priority } = group[j]
             if (typeof matcher === 'string' && matcher === node.source.value) {
                 return [i, j]
             } else if (typeof matcher === 'object' && matcher.test(node.source.value) && priority > currentPrio) {
@@ -23,7 +25,7 @@ const getSortedImport = (option, importNodes) => {
     const result = option.map(
         group => group.map(() => [])
     )
-    importNodes.forEach( importNode => {
+    importNodes.forEach(importNode => {
         const { loc: [i, j] } = importNode
         result[i][j].push(importNode)
     })
@@ -44,14 +46,16 @@ const markLastMember = sortedGroup => sortedGroup.forEach(
     group => group.length && (group[group.length - 1].isLastMember = true)
 )
 
-const getErrorReport = ({ node, errors, rank, loc }) => {
+const getErrorReport = ({ node, errors, rank }) => {
     const infos = errors.map(
         ({ type, data }) => {
-            switch(type) {
+            switch (type) {
                 case 'order':
                     return `Wrong placement, should be at line ${rank + 1} instead of line ${data.index + 1}`
                 case 'seperator':
                     return `Wrong seperator, should be after 1 instead of ${data.number} empty lines`
+                default:
+                    return ''
             }
         }
     )
@@ -109,7 +113,6 @@ module.exports = {
             priority: Number.MIN_SAFE_INTEGER
         }])
         const importNodes = []
-        let fixRangeEnd = 0
         let firstNotImpNode = null
         return {
             ImportDeclaration(node) {
@@ -126,7 +129,6 @@ module.exports = {
             },
             'Program > ImportDeclaration + :not(ImportDeclaration)'(node) {
                 if (!firstNotImpNode) {
-                    fixRangeEnd = node.range[0]
                     firstNotImpNode = node
                 }
             },
@@ -135,22 +137,20 @@ module.exports = {
 
                 if (!firstNotImpNode) {
                     return context.report({
-                        message: `It seems you aren't doing anything`,
+                        message: 'It seems you aren\'t doing anything',
                         loc: {
                             start: importNodes[0].node.loc.start,
                             end: importNodes[importNodes.length - 1].node.loc.end
                         }
                     })
                 }
-                const { lines } = sourceCode
-
                 const sortedGroup = getSortedImport(option, importNodes)
                 // rank available
                 markImportRank(sortedGroup)
                 markLastMember(sortedGroup)
 
                 importNodes.forEach(
-                    ({rank, errors, isLastMember, node}, index) => {
+                    ({ rank, errors, isLastMember, node }, index) => {
                         if (rank !== index) {
                             errors.push({
                                 type: 'order',
@@ -190,20 +190,14 @@ module.exports = {
                 context.report({
                     ...getErrorReport(errorImportNodes[errorImportNodes.length - 1]),
                     fix(fixer) {
-                        if (fixRangeEnd === 0 && importNodes.length) {
-                            fixRangeEnd = importNodes[importNodes.length - 1].node.range[1]
-                        }
-                        const range = [0, fixRangeEnd]
+                        const range = [0, firstNotImpNode.range[0]]
                         const resultSourceCode = sortedGroup.filter(
                             group => group.length
                         ).map(
-                            group => group.map(
-                                ({ node }) => sourceCode.getText(node) + '\n'
-                            ).join('') + '\n'
+                            group => `${group.map(
+                                ({ node }) => `${sourceCode.getText(node)}\n`
+                            ).join('')}\n`
                         ).join('')
-                        console.log('--------')
-                        console.log(resultSourceCode)
-                        console.log('--------')
                         return fixer.replaceTextRange(range, resultSourceCode)
                     }
                 })
