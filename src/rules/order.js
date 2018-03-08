@@ -116,15 +116,13 @@ module.exports = {
         let firstNotImpNode = null
         return {
             ImportDeclaration(node) {
-                // ignore next ImportDeclaration
-                if (firstNotImpNode) return
-
                 importNodes.push({
                     node,
                     loc: findLoc(option, node),
                     rank: 0,
                     errors: [],
-                    isLastMember: false
+                    isLastMember: false,
+                    isAtBeginning: !firstNotImpNode
                 })
             },
             'Program > ImportDeclaration + :not(ImportDeclaration)'(node) {
@@ -191,6 +189,11 @@ module.exports = {
                     ...getErrorReport(errorImportNodes[errorImportNodes.length - 1]),
                     fix(fixer) {
                         const range = [0, firstNotImpNode.range[0]]
+                        const result = importNodes.filter(
+                            importNode => !importNode.isAtBeginning
+                        ).map(
+                            ({ node }) => fixer.remove(node)
+                        )
                         const resultSourceCode = sortedGroup.filter(
                             group => group.length
                         ).map(
@@ -198,7 +201,8 @@ module.exports = {
                                 ({ node }) => `${sourceCode.getText(node)}\n`
                             ).join('')}\n`
                         ).join('')
-                        return fixer.replaceTextRange(range, resultSourceCode)
+                        result.push(fixer.replaceTextRange(range, resultSourceCode))
+                        return result
                     }
                 })
             }
