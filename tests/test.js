@@ -7,22 +7,14 @@ const parserOptions = {
     ecmaVersion: 8,
     sourceType: 'module'
 }
-const options = [{
-    order: ['a', 'b', 'c'],
-    groups: {
-        a: {
-            member: 'byUsingOrder',
-            sorter: 'byType',
-            match: 'd',
-            separator: true,
-        }
-    },
-    defaultSetting: {
-        member: 'byUsingOrder',
-        group: 'byName',
-        separator: false
-    }
-}]
+const options = [
+    [
+        ['react', 'react-dom', 'react-router', 'axios'],
+        ['/^\\.\\.\\// | 1', '/^\\.\\// | 1'],
+        ['moment'],
+        ['/\\.css$/ | 9']
+    ]
+]
 
 const cases = Object.values(requireIndex(__dirname + '/cases'))
 

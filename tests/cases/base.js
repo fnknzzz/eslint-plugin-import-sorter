@@ -1,24 +1,38 @@
 module.exports = {
     valid:
 `
-import a from 'd'
-import {b, c} from 'c'
+import React from 'react'
+import { render } from 'react-dom'
+
+import Main from '../main/Main.js'
+
+import '../index.css'
+
+var a = '1'
 `,
     invalid: [
 `
-import a from
-'c'
-import v from 'd'
+import React, {Component} from 'react'
+import {render} from 'react-dom'
+import './index.css'
 
-var aa = 123
+import Main from '../main/Main.js'
+
+var a = '1'
 `, 
 `
-import v from 'd'
+import React, {Component} from 'react'
+import {render} from 'react-dom'
 
-import a from
-'c'
+import Main from '../main/Main.js'
 
-var aa = 123
+import './index.css'
+
+var a = '1'
 `, 
-['group `c` should be placed after group `a`']]
+[
+    'Wrong seperator, should be after 1 instead of 0 empty lines',
+    'Wrong placement, should be at line 4 instead of line 3',
+    'Wrong placement, should be at line 3 instead of line 4'
+]]
 }
