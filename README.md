@@ -46,11 +46,26 @@ Then configure the rules you want to use under the rules section.
     }
 }
 ```
+
 The main option `order` recieves an two-demensional array which consists with `group-option`. Different groups will be seperated with an empty line. If you don't want this, just set options in one group.
 
 A `group-option` consists with `matcher` and priority, joined in '|' and several white-space.
 
 A `matcher` is a string. If the string starts and ends with '/', then we considered it as a RegExp literal matcher created by JS RegExp constructor with chars between the two '/'. Otherwise as an absolute matcher, only when the package name absolute equals to the matcher.
+
+**Note.** Maybe many `\` will be used in RegExp matcher. Remember *TWO* `\` will be transferred to a *single* `\`. 
+
+For exmaple, if you want a RegExp matcher with literal like this
+
+```js
+/^\.\.\//
+```
+
+ you need to set the option json like this:
+ 
+```json
+"/^\\.\\.\\//"
+```
 
 Sometimes an import declaration could be matched with several matcher, then `priority` should be considered. Import declarations are always matches the bigger priority option.
 

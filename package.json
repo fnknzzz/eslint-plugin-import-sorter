@@ -1,6 +1,6 @@
 {
     "name": "eslint-plugin-import-sorter",
-    "version": "0.0.2",
+    "version": "0.1.0",
     "description": "Auto sort the import declarations",
     "keywords": [
         "eslint",
