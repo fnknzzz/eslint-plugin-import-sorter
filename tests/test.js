@@ -9,10 +9,31 @@ const parserOptions = {
 }
 const options = [
     [
-        ['react', 'react-dom', 'react-router', 'axios'],
-        ['/^\\.\\.\\// | 1', '/^\\.\\// | 1'],
-        ['moment'],
-        ['/\\.css$/ | 9']
+        [
+            "react",
+            "react-dom",
+            "redux",
+            "react-redux",
+            "redux-thunk",
+            "react-router",
+            "react-router-dom",
+            "styled-components",
+            "/^antd/",
+            "axios",
+            "moment"
+        ],
+        [
+            "/^__/ | 8"
+        ],
+        [
+            "/(\\.\\.\\/){2}/",
+            "/(\\.\\.\\/){1}/",
+            "/(\\.\\/)/",
+            "/^(\\w+\\/)+/ | 7"
+        ],
+        [
+            "/\\.css$/ | 9"
+        ] 
     ]
 ]
 

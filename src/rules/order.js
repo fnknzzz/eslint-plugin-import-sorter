@@ -4,11 +4,11 @@ const isRegExpMatcher = (() => {
 })()
 
 const findLoc = (option, node) => {
-    let currentPrio = 0
+    let currentPrio = Number.MIN_SAFE_INTEGER
     let temp = []
     for (let i = 0; i < option.length; i++) {
         const group = option[i]
-        for (let j = 0; i < group.length; j++) {
+        for (let j = 0; j < group.length; j++) {
             const { matcher, priority } = group[j]
             if (typeof matcher === 'string' && matcher === node.source.value) {
                 return [i, j]
@@ -26,7 +26,7 @@ const getSortedImport = (option, importNodes) => {
         group => group.map(() => [])
     )
     importNodes.forEach(importNode => {
-        const { loc: [i, j] } = importNode
+        const [i, j] = importNode.loc
         result[i][j].push(importNode)
     })
     return result.map(
@@ -108,9 +108,9 @@ module.exports = {
             )
         )
         // default unmatched node placed at the end
-        option.push([{
-            matcher: /\./,
-            priority: Number.MIN_SAFE_INTEGER
+        option.push([{ 
+            matcher: /./,
+            priority: Number.MIN_SAFE_INTEGER + 1
         }])
         const importNodes = []
         let firstNotImpNode = null
