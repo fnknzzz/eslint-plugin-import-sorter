@@ -1,11 +1,13 @@
 {
     "name": "eslint-plugin-import-sorter",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Auto sort the import declarations",
     "keywords": [
         "eslint",
         "eslintplugin",
-        "eslint-plugin"
+        "eslint-plugin",
+        "import",
+        "sort"
     ],
     "author": "fengk (https://github.com/fengkfengk)",
     "main": "lib/index.js",

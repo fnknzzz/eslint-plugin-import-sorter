@@ -65,10 +65,10 @@ Option:
         "import-sorter/order": [
             2,
             [
-                ['react', 'react-dom', 'react-router', 'axios'],
-                ['/^\\.\\.\\// | 1', '/^\\\\.\\\\// | 1'],
-                ['moment'],
-                ['/\\.css$/ | 9']
+                ["react", "react-dom", "react-router", "axios"],
+                ["/^\\.\\.\\// | 1", "/^\\\\.\\\\// | 1"],
+                ["moment"],
+                ["/\\.css$/ | 9"]
             ]
         ]
     }

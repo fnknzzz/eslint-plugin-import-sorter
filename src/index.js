@@ -15,6 +15,4 @@ import requireIndex from 'requireindex'
 
 
 // import all rules in lib/rules
-export default {
-    rules: requireIndex(__dirname + "/rules")
-}
+export const rules = requireIndex(__dirname + "/rules")
