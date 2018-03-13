@@ -50,7 +50,7 @@ ruleTester.run('test', rule, {
             .map(([code, output, messages]) => ({
                 code: code.trim(),
                 output: output.trim(),
-                errors: messages.map(message => ({
+                errors: typeof messages === 'number'? messages : messages.map(message => ({
                     message,
                     type: 'ImportDeclaration'
                 })),

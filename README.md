@@ -51,9 +51,11 @@ The main option `order` recieves an two-demensional array which consists with `g
 
 A `group-option` consists with `matcher` and priority, joined in '|' and several white-space.
 
-A `matcher` is a string. If the string starts and ends with '/', then we considered it as a RegExp literal matcher created by JS RegExp constructor with chars between the two '/'. Otherwise as an absolute matcher, only when the package name absolute equals to the matcher.
+A `matcher` is a string. If the string starts and ends with '/', then we considered it as a RegExp literal matcher created by JS RegExp constructor with chars between the two '/'. Otherwise as an absolute matcher, *only* when the package name absolute equals to the matcher.
 
-**Note.** Maybe many `\` will be used in RegExp matcher. Remember *TWO* `\` will be transferred to a *single* `\`. 
+Althought only beginning imports will be sort, if the first statement is a directive, it will still be ignored.
+
+**Note.** Maybe many `\` will be used in RegExp matcher. Remember `\\` will be transferred to a `\`. 
 
 For exmaple, if you want a RegExp matcher with literal like this
 

@@ -108,12 +108,13 @@ module.exports = {
             )
         )
         // default unmatched node placed at the end
-        option.push([{ 
+        option.push([{
             matcher: /./,
             priority: Number.MIN_SAFE_INTEGER + 1
         }])
         const importNodes = []
         let firstNotImpNode = null
+        let firstNode = null
         return {
             ImportDeclaration(node) {
                 importNodes.push({
@@ -125,12 +126,22 @@ module.exports = {
                     isAtBeginning: !firstNotImpNode
                 })
             },
-            'Program > ImportDeclaration + :not(ImportDeclaration)'(node) {
+            'Program > :first-child'(node) {
+                firstNode = node
+            },
+            'ImportDeclaration + :not(ImportDeclaration)'(node) {
                 if (!firstNotImpNode) {
                     firstNotImpNode = node
                 }
             },
             'Program:exit'() {
+                const isDirective = firstNode.type === 'ExpressionStatement' && typeof firstNode.directive === 'string'
+
+                if (firstNode.type !== 'ImportDeclaration') {
+                    if (!isDirective) {
+                        return
+                    }
+                }
                 if (!importNodes.length) return
 
                 if (!firstNotImpNode) {
@@ -188,7 +199,7 @@ module.exports = {
                 context.report({
                     ...getErrorReport(errorImportNodes[errorImportNodes.length - 1]),
                     fix(fixer) {
-                        const range = [0, firstNotImpNode.range[0]]
+                        const range = [isDirective ? importNodes[0].node.range[0] : 0, firstNotImpNode.range[0]]
                         const result = importNodes.filter(
                             importNode => !importNode.isAtBeginning
                         ).map(
