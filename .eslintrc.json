@@ -39,6 +39,10 @@
             "after": true
         }],
         "object-shorthand": [2, "always"],
-        "radix": [2, "as-needed"]
+        "radix": 0,
+        "prefer-destructuring": [2, {
+            "object": true,
+            "array": false
+        }]
     }
 }

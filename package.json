@@ -1,6 +1,6 @@
 {
     "name": "eslint-plugin-import-sorter",
-    "version": "0.1.0",
+    "version": "0.3.0",
     "description": "Auto sort the import declarations",
     "keywords": [
         "eslint",
@@ -21,7 +21,7 @@
     "homepage": "https://github.com/fengkfengk/import-sort-react-first#readme",
     "scripts": {
         "build": "npx babel src --out-dir lib",
-        "test": "mocha tests/test.js --recursive",
+        "test": "mocha tests --recursive",
         "lint": "eslint src/rules --fix",
         "start": "npm run build & npm test"
     },

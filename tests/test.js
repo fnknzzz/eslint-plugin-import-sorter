@@ -2,7 +2,6 @@ const requireIndex = require('requireindex')
 const rule = require('../lib/rules/order')
 const RuleTester = require('eslint').RuleTester
 
-const ruleTester = new RuleTester()
 const parserOptions = {
     ecmaVersion: 8,
     sourceType: 'module'
@@ -37,13 +36,17 @@ const options = [
     ]
 ]
 
+const ruleTester = new RuleTester({
+    parserOptions,
+    parser: 'babel-eslint'
+})
+
 const cases = Object.values(requireIndex(__dirname + '/cases'))
 
 ruleTester.run('test', rule, {
     valid: cases.map(_case => _case.valid)
             .map(code => ({
                 code: code.trim(),
-                parserOptions,
                 options
             })),
     invalid: cases.map(_case => _case.invalid)
@@ -54,7 +57,6 @@ ruleTester.run('test', rule, {
                     message,
                     type: 'ImportDeclaration'
                 })),
-                parserOptions,
                 options
             }))
 })

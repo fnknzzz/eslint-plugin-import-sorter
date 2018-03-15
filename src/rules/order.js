@@ -3,6 +3,10 @@ const isRegExpMatcher = (() => {
     return str => regExp.test(str)
 })()
 
+const isDirective = node => node.type === 'ExpressionStatement' &&
+                            node.expression.type === 'Literal' &&
+                            typeof node.directive === 'string'
+
 const findLoc = (option, node) => {
     let currentPrio = Number.MIN_SAFE_INTEGER
     let temp = []
@@ -21,19 +25,6 @@ const findLoc = (option, node) => {
     return temp
 }
 
-const getSortedImport = (option, importNodes) => {
-    const result = option.map(
-        group => group.map(() => [])
-    )
-    importNodes.forEach(importNode => {
-        const [i, j] = importNode.loc
-        result[i][j].push(importNode)
-    })
-    return result.map(
-        group => group.reduce((a, b) => [...a, ...b])
-    )
-}
-
 const markImportRank = sortedGroup => {
     let rank = 0
     sortedGroup.forEach(
@@ -42,35 +33,43 @@ const markImportRank = sortedGroup => {
         )
     )
 }
+
 const markLastMember = sortedGroup => sortedGroup.forEach(
     group => group.length && (group[group.length - 1].isLastMember = true)
 )
 
-const getErrorReport = ({ node, errors, rank }) => {
-    const infos = errors.map(
-        ({ type, data }) => {
-            switch (type) {
-                case 'order':
-                    return `Wrong placement, should be at line ${rank + 1} instead of line ${data.index + 1}`
-                case 'seperator':
-                    return `Wrong seperator, should be after 1 instead of ${data.number} empty lines`
-                default:
-                    return ''
-            }
+const getSortedImport = (option, importNodes) => {
+    const result = option.map(
+        group => group.map(() => [])
+    )
+    importNodes.forEach(
+        importNode => {
+            const { loc: [i, j] } = importNode
+            result[i][j].push(importNode)
         }
     )
-    return {
-        node,
-        message: infos.join(';\n')
+    return result.map(
+        group => group.reduce((a, b) => [...a, ...b])
+    )
+}
+
+const getErrorMessage = ({ type }) => {
+    switch (type) {
+        case 'order':
+            return 'Wrong placement.'
+        case 'seperator':
+            return 'Should be followed by 1 empty line.'
+        default:
+            // no default current
     }
 }
 
 module.exports = {
     meta: {
         docs: {
-            description: 'test',
-            category: 'Possible Errors',
-            recommended: false
+            description: 'sort imports',
+            category: 'Personal Style',
+            recommended: 'false'
         },
         schema: [{
             type: 'array',
@@ -86,9 +85,8 @@ module.exports = {
     create(context) {
         const sourceCode = context.getSourceCode()
         const option = context.options[0].map(
-            optionGroup => optionGroup.map(
+            group => group.map(
                 option => {
-                    // for future APIs
                     let matcher
                     let priority
                     if (typeof option === 'object') {
@@ -96,7 +94,7 @@ module.exports = {
                     } else if (typeof option === 'string') {
                         [matcher, priority = 0] = option.split('|').map(str => str.trim())
                     }
-                    priority = parseInt(priority)
+                    priority = parseInt(priority, 10)
                     if (isRegExpMatcher(matcher)) {
                         matcher = new RegExp(RegExp.$1)
                     }
@@ -107,54 +105,36 @@ module.exports = {
                 }
             )
         )
-        // default unmatched node placed at the end
         option.push([{
             matcher: /./,
             priority: Number.MIN_SAFE_INTEGER + 1
         }])
         const importNodes = []
+        let fixRangeEnd = 0
         let firstNotImpNode = null
-        let firstNode = null
         return {
-            ImportDeclaration(node) {
-                importNodes.push({
-                    node,
-                    loc: findLoc(option, node),
-                    rank: 0,
-                    errors: [],
-                    isLastMember: false,
-                    isAtBeginning: !firstNotImpNode
-                })
-            },
-            'Program > :first-child'(node) {
-                firstNode = node
-            },
-            'ImportDeclaration + :not(ImportDeclaration)'(node) {
-                if (!firstNotImpNode) {
-                    firstNotImpNode = node
-                }
-            },
-            'Program:exit'() {
-                const isDirective = firstNode.type === 'ExpressionStatement' && typeof firstNode.directive === 'string'
-
-                if (firstNode.type !== 'ImportDeclaration') {
-                    if (!isDirective) {
-                        return
-                    }
-                }
-                if (!importNodes.length) return
-
-                if (!firstNotImpNode) {
-                    return context.report({
-                        message: 'It seems you aren\'t doing anything',
-                        loc: {
-                            start: importNodes[0].node.loc.start,
-                            end: importNodes[importNodes.length - 1].node.loc.end
+            Program(program) {
+                const startWithDirective = isDirective(program.body[0])
+                program.body.slice(startWithDirective ? 1 : 0).forEach(
+                    node => {
+                        if (firstNotImpNode) return
+                        if (node.type === 'ImportDeclaration') {
+                            importNodes.push({
+                                node,
+                                loc: findLoc(option, node),
+                                rank: 0,
+                                errors: [],
+                                isLastMember: false
+                            })
+                        } else {
+                            firstNotImpNode = node
+                            fixRangeEnd = node.range[0]
                         }
-                    })
-                }
+                    }
+                )
+                if (!importNodes.length || !firstNotImpNode) return
+
                 const sortedGroup = getSortedImport(option, importNodes)
-                // rank available
                 markImportRank(sortedGroup)
                 markLastMember(sortedGroup)
 
@@ -173,7 +153,7 @@ module.exports = {
                             const lastLine = (
                                 (index < importNodes.length - 1) ? importNodes[index + 1].node : firstNotImpNode
                             ).loc.start.line
-                            const linesBetween = sourceCode.lines.slice(firstLine, lastLine - 1).length
+                            const linesBetween = lastLine - firstLine - 1
                             if (linesBetween !== 1) {
                                 errors.push({
                                     type: 'seperator',
@@ -185,26 +165,28 @@ module.exports = {
                         }
                     }
                 )
-
                 const errorImportNodes = importNodes.filter(
-                    importNode => importNode.errors.length
+                    ({ errors }) => errors.length
                 )
-                // no problems
                 if (!errorImportNodes.length) return
-
-                errorImportNodes.slice(0, -1).forEach(
-                    importNode => context.report(getErrorReport(importNode))
+                const lastError = errorImportNodes[errorImportNodes.length - 1].errors.pop()
+                errorImportNodes.forEach(
+                    ({ node, errors }) => errors.forEach(
+                        error => context.report({
+                            node,
+                            message: getErrorMessage(error),
+                            fix: fixer => fixer.insertTextBefore(firstNotImpNode, '')
+                        })
+                    )
                 )
-                // applying fixer at the end of report
                 context.report({
-                    ...getErrorReport(errorImportNodes[errorImportNodes.length - 1]),
+                    node: errorImportNodes[errorImportNodes.length - 1].node,
+                    message: getErrorMessage(lastError),
                     fix(fixer) {
-                        const range = [isDirective ? importNodes[0].node.range[0] : 0, firstNotImpNode.range[0]]
-                        const result = importNodes.filter(
-                            importNode => !importNode.isAtBeginning
-                        ).map(
-                            ({ node }) => fixer.remove(node)
-                        )
+                        if (fixRangeEnd === 0) {
+                            fixRangeEnd = importNodes[importNodes.length - 1].node.range[1]
+                        }
+                        const range = [importNodes[0].node.range[0], fixRangeEnd]
                         const resultSourceCode = sortedGroup.filter(
                             group => group.length
                         ).map(
@@ -212,8 +194,7 @@ module.exports = {
                                 ({ node }) => `${sourceCode.getText(node)}\n`
                             ).join('')}\n`
                         ).join('')
-                        result.push(fixer.replaceTextRange(range, resultSourceCode))
-                        return result
+                        return fixer.replaceTextRange(range, resultSourceCode)
                     }
                 })
             }
