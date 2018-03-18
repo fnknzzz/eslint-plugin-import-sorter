@@ -84,7 +84,7 @@ module.exports = {
     },
     create(context) {
         const sourceCode = context.getSourceCode()
-        const option = context.options[0].map(
+        const option = (context.options[0] || []).map(
             group => group.map(
                 option => {
                     let matcher
