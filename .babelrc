@@ -1,6 +1,25 @@
 {
     "presets": [
-        "es2015",
         "stage-0"
-    ]
+    ],
+    "env": {
+        "production": {
+            "presets": [
+                ["env", {
+                    "targets": {
+                        "node": "4.0.0"
+                    }
+                }]
+            ]
+        },
+        "dev": {
+            "presets": [
+                ["env", {
+                    "targets": {
+                        "node": "current"
+                    }
+                }]
+            ]
+        }
+    }
 }

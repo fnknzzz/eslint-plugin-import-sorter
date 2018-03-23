@@ -10,9 +10,11 @@ const formatOption = options => {
             } else {
                 return options[0]
             }
+            break
         case 2:
             settings.order = options[0]
             settings.firstType = options[1]
+            break
         default:
             // no default
     }
@@ -21,7 +23,7 @@ const formatOption = options => {
 
 const getSortedSpecifiers = (specifiers, option, { scopeManager }) => {
     const sortFunc = option.order === 'byName' ? (
-        (a, b) => a.local.name < b.local.name ? -1 : 1
+        (a, b) => (a.local.name < b.local.name ? -1 : 1)
     ) : (
         (a, b) => {
             const aReferences = scopeManager.getDeclaredVariables(a)[0].references
@@ -56,6 +58,8 @@ module.exports = {
         },
         schema: [{
             type: 'string'
+        }, {
+            type: 'string'
         }],
         fixable: 'code'
     },
@@ -70,23 +74,13 @@ module.exports = {
                     specifiers = specifiers.slice(1)
                 }
                 const sorted = getSortedSpecifiers(specifiers, option, sourceCode)
-                let isWrong = false
-                for (let i = 0; i < sorted.length; i++) {
-                    if (sorted[i] !== specifiers[i]) {
-                        isWrong = true
-                        break
-                    }
-                }
-                if (isWrong) {
+                if (sorted.find((specifier, i) => specifier !== specifiers[i])) {
                     context.report({
                         message: 'Wrong specifiers order.',
                         node,
                         fix(fixer) {
-                            const specifiersText = sorted.map(
-                                specifier => sourceCode.getText(specifier)
-                            )
                             return specifiers.map(
-                                ({ range }) => fixer.replaceTextRange(range, specifiersText)
+                                ({ range }, i) => fixer.replaceTextRange(range, sourceCode.getText(sorted[i]))
                             )
                         }
                     })
