@@ -27,7 +27,7 @@
         }],
         "no-plusplus": 0,
         "comma-dangle": [2, "only-multiline"],
-        "linebreak-style": [2, "windows"],
+        "linebreak-style": 0,
         "semi": [2, "never"],
         "consistent-return": 0,
         "no-confusing-arrow": [2, {
