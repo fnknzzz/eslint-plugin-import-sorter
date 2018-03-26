@@ -50,13 +50,18 @@ ruleTester.run('test', rule, {
                 options
             })),
     invalid: cases.map(_case => _case.invalid)
-            .map(([code, output, messages]) => ({
-                code: code.trim(),
-                output: output.trim(),
-                errors: typeof messages === 'number'? messages : messages.map(message => ({
-                    message,
-                    type: 'ImportDeclaration'
-                })),
-                options
-            }))
+            .map((item) => {
+                const code = item[0]
+                const output = item[1]
+                const messages = item[2]
+                return ({
+                    code: code.trim(),
+                    output: output.trim(),
+                    errors: typeof messages === 'number'? messages : messages.map(message => ({
+                        message,
+                        type: 'ImportDeclaration'
+                    })),
+                    options
+                })
+            })
 })
