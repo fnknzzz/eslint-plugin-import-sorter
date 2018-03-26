@@ -50,10 +50,7 @@ ruleTester.run('test', rule, {
                 options
             })),
     invalid: cases.map(_case => _case.invalid)
-            .map((item) => {
-                const code = item[0]
-                const output = item[1]
-                const messages = item[2]
+            .map(([code, output, message]) => {
                 return ({
                     code: code.trim(),
                     output: output.trim(),
