@@ -21,8 +21,10 @@
     "homepage": "https://github.com/fengkfengk/import-sort-react-first#readme",
     "scripts": {
         "prepublish": "npm run build",
+        "pretest": "npm run build",
         "build": "cross-env BABEL_ENV=production npx babel src --out-dir lib",
-        "test": "cross-env BABEL_ENV=dev npx babel src --out-dir lib && mocha tests --recursive && eslint src/rules",
+        "test": "mocha tests --recursive",
+        "dev": "cross-env BABEL_ENV=dev npx babel src --out-dir lib && mocha tests --recursive && eslint src/rules",
         "fix": "eslint src/rules --fix"
     },
     "dependencies": {
