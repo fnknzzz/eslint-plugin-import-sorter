@@ -10,9 +10,11 @@ const formatOption = options => {
             } else {
                 return options[0]
             }
+            break
         case 2:
             settings.order = options[0]
             settings.firstType = options[1]
+            break
         default:
             // no default
     }
@@ -21,7 +23,7 @@ const formatOption = options => {
 
 const getSortedSpecifiers = (specifiers, option, { scopeManager }) => {
     const sortFunc = option.order === 'byName' ? (
-        (a, b) => a.local.name < b.local.name ? -1 : 1
+        (a, b) => (a.local.name < b.local.name ? -1 : 1)
     ) : (
         (a, b) => {
             const aReferences = scopeManager.getDeclaredVariables(a)[0].references

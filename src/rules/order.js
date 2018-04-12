@@ -84,6 +84,7 @@ module.exports = {
     },
     create(context) {
         const sourceCode = context.getSourceCode()
+        const originSourceCode = sourceCode.getText()
         const option = (context.options[0] || []).map(
             group => group.map(
                 option => {
@@ -115,20 +116,25 @@ module.exports = {
         return {
             Program(program) {
                 const startWithDirective = isDirective(program.body[0])
-                program.body.slice(startWithDirective ? 1 : 0).forEach(
-                    node => {
-                        if (firstNotImpNode) return
+                program.body.forEach(
+                    (node, index) => {
+                        if (index === 0 && startWithDirective) return
                         if (node.type === 'ImportDeclaration') {
                             importNodes.push({
                                 node,
                                 loc: findLoc(option, node),
+                                range: [
+                                    index === 0 ? 0 : program.body[index - 1].range[1],
+                                    node.range[1]
+                                ],
                                 rank: 0,
                                 errors: [],
+                                shouldRemove: !!firstNotImpNode,
                                 isLastMember: false
                             })
                         } else {
-                            firstNotImpNode = node
-                            fixRangeEnd = node.range[0]
+                            firstNotImpNode = firstNotImpNode || node
+                            fixRangeEnd = fixRangeEnd || node.range[0]
                         }
                     }
                 )
@@ -183,18 +189,20 @@ module.exports = {
                     node: errorImportNodes[errorImportNodes.length - 1].node,
                     message: getErrorMessage(lastError),
                     fix(fixer) {
-                        if (fixRangeEnd === 0) {
-                            fixRangeEnd = importNodes[importNodes.length - 1].node.range[1]
-                        }
                         const range = [importNodes[0].node.range[0], fixRangeEnd]
-                        const resultSourceCode = sortedGroup.filter(
+                        const resultSourceCode = `${sortedGroup.filter(
                             group => group.length
                         ).map(
                             group => `${group.map(
-                                ({ node }) => `${sourceCode.getText(node)}\n`
-                            ).join('')}\n`
-                        ).join('')
-                        return fixer.replaceTextRange(range, resultSourceCode)
+                                ({ range }) => originSourceCode.slice(...range).replace(
+                                    /^\s*/, '\n'
+                                )
+                            ).join('')}`
+                        ).join('\n').trim()}\n\n`
+                        return [fixer.replaceTextRange(range, resultSourceCode)].concat(
+                            errorImportNodes.filter(({ shouldRemove }) => shouldRemove)
+                                .map(({ range }) => fixer.removeRange(range))
+                        )
                     }
                 })
             }

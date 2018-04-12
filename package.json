@@ -21,9 +21,10 @@
     "homepage": "https://github.com/fengkfengk/import-sort-react-first#readme",
     "scripts": {
         "build": "npx babel src --out-dir lib",
-        "test": "mocha tests --recursive",
-        "lint": "eslint src/rules --fix",
-        "start": "npm run build & npm test"
+        "pure-test": "mocha tests --recursive",
+        "pretest": "npm run build",
+        "test": "npm run pure-test && npm run lint",
+        "lint": "eslint src/rules --fix"
     },
     "dependencies": {
         "requireindex": "~1.1.0"
