@@ -1,3 +1,5 @@
+const defaultOption = [[], 8, 3]
+
 const isRegExpMatcher = (() => {
     const regExp = /^\/(.*)\/$/
     return str => regExp.test(str)
@@ -14,9 +16,15 @@ const findLoc = (option, node) => {
         const group = option[i]
         for (let j = 0; j < group.length; j++) {
             const { matcher, priority } = group[j]
-            if (typeof matcher === 'string' && matcher === node.source.value) {
+            if (
+                typeof matcher === 'string' &&
+                matcher === node.source.value
+            ) {
                 return [i, j]
-            } else if (typeof matcher === 'object' && matcher.test(node.source.value) && priority > currentPrio) {
+            } else if (
+                typeof matcher === 'object' &&
+                matcher.test(node.source.value) && priority > currentPrio
+            ) {
                 temp = [i, j]
                 currentPrio = priority
             }
@@ -34,9 +42,6 @@ const markImportRank = sortedGroup => {
     )
 }
 
-const markLastMember = sortedGroup => sortedGroup.forEach(
-    group => group.length && (group[group.length - 1].isLastMember = true)
-)
 
 const getSortedImport = (option, importNodes) => {
     const result = option.map(
@@ -49,7 +54,7 @@ const getSortedImport = (option, importNodes) => {
         }
     )
     return result.map(
-        group => group.reduce((a, b) => [...a, ...b])
+        group => group.reduce((a, b) => [...a, ...b], [])
     )
 }
 
@@ -57,10 +62,54 @@ const getErrorMessage = ({ type }) => {
     switch (type) {
         case 'order':
             return 'Wrong placement.'
-        case 'seperator':
+        case 'with-seperator':
             return 'Should be followed by 1 empty line.'
+        case 'without-seperator':
+            return 'Shouldn\'t be followed by empty line(s)'
         default:
             // no default current
+    }
+}
+
+const normalizeOption = options => {
+    const order = options[0].map(
+        group => group.map(
+            option => {
+                let matcher
+                let priority
+                if (typeof option === 'object') {
+                    ({ matcher, priority } = option)
+                } else if (typeof option === 'string') {
+                    [matcher, priority = 0] = option.split('|')
+                                                    .map(str => str.trim())
+                }
+                priority = parseInt(priority, 10)
+                if (isRegExpMatcher(matcher)) {
+                    matcher = new RegExp(RegExp.$1)
+                }
+                return {
+                    matcher,
+                    priority
+                }
+            }
+        )
+    )
+    switch (options.length) {
+        case 1:
+            return [order, defaultOption[1], defaultOption[2]]
+        case 2:
+            if (typeof options[1] === 'number') {
+                return [order, options[1], defaultOption[2]]
+            }
+            return [
+                order,
+                options[1].limit || defaultOption[1],
+                options[1].groupLength || defaultOption[2]
+            ]
+        case 3:
+            return [order, options[1], options[2]]
+        default:
+            // no defualt
     }
 }
 
@@ -71,47 +120,18 @@ module.exports = {
             category: 'Personal Style',
             recommended: 'false'
         },
-        schema: [{
-            type: 'array',
-            items: {
-                type: 'array',
-                items: {
-                    type: 'string'
-                }
-            }
-        }],
         fixable: 'code'
     },
     create(context) {
         const sourceCode = context.getSourceCode()
         const originSourceCode = sourceCode.getText()
-        const option = (context.options[0] || []).map(
-            group => group.map(
-                option => {
-                    let matcher
-                    let priority
-                    if (typeof option === 'object') {
-                        ({ matcher, priority } = option)
-                    } else if (typeof option === 'string') {
-                        [matcher, priority = 0] = option.split('|').map(str => str.trim())
-                    }
-                    priority = parseInt(priority, 10)
-                    if (isRegExpMatcher(matcher)) {
-                        matcher = new RegExp(RegExp.$1)
-                    }
-                    return {
-                        matcher,
-                        priority
-                    }
-                }
-            )
-        )
+        const [option, limit, groupLength] = normalizeOption(context.options)
         option.push([{
             matcher: /./,
             priority: Number.MIN_SAFE_INTEGER + 1
         }])
         const importNodes = []
-        let fixRangeEnd = 0
+        let insertRangeEnd = 0
         let firstNotImpNode = null
         return {
             Program(program) {
@@ -130,44 +150,59 @@ module.exports = {
                                 rank: 0,
                                 errors: [],
                                 shouldRemove: !!firstNotImpNode,
-                                isLastMember: false
+                                seperator: false
                             })
-                        } else {
-                            firstNotImpNode = firstNotImpNode || node
-                            fixRangeEnd = fixRangeEnd || node.range[0]
+                        } else if (!firstNotImpNode) {
+                            firstNotImpNode = node
+                            insertRangeEnd = node.range[0]
                         }
                     }
                 )
                 if (!importNodes.length || !firstNotImpNode) return
 
                 const sortedGroup = getSortedImport(option, importNodes)
+                                        .filter(group => group.length)
+                const lastGroup = sortedGroup[sortedGroup.length - 1]
+                lastGroup[lastGroup.length - 1].seperator = true
                 markImportRank(sortedGroup)
-                markLastMember(sortedGroup)
+                if (importNodes.length >= limit) {
+                    sortedGroup.forEach(
+                        group => (group[group.length - 1].seperator = true)
+                    )
+                } else {
+                    sortedGroup.forEach(
+                        (group, i) => {
+                            if (group.length >= groupLength) {
+                                group[group.length - 1].seperator = true
+                                const nextGroup = sortedGroup[i - 1]
+                                nextGroup && (nextGroup[nextGroup.length - 1].seperator = true)
+                            }
+                        }
+                    )
+                }
 
                 importNodes.forEach(
-                    ({ rank, errors, isLastMember, node }, index) => {
+                    ({ rank, errors, seperator, node }, index) => {
                         if (rank !== index) {
                             errors.push({
-                                type: 'order',
-                                data: {
-                                    index
-                                }
+                                type: 'order'
                             })
                         }
-                        if (isLastMember) {
-                            const firstLine = node.loc.end.line
-                            const lastLine = (
-                                (index < importNodes.length - 1) ? importNodes[index + 1].node : firstNotImpNode
-                            ).loc.start.line
-                            const linesBetween = lastLine - firstLine - 1
-                            if (linesBetween !== 1) {
-                                errors.push({
-                                    type: 'seperator',
-                                    data: {
-                                        number: linesBetween
-                                    }
-                                })
-                            }
+                        const firstLine = node.loc.end.line
+                        const lastLine = (
+                            (index < importNodes.length - 1) ?
+                                importNodes[index + 1].node :
+                                firstNotImpNode
+                        ).loc.start.line
+                        const linesBetween = lastLine - firstLine - 1
+                        if (seperator && linesBetween !== 1) {
+                            errors.push({
+                                type: 'with-seperator'
+                            })
+                        } else if (!seperator && linesBetween > 0) {
+                            errors.push({
+                                type: 'without-seperator'
+                            })
                         }
                     }
                 )
@@ -175,7 +210,8 @@ module.exports = {
                     ({ errors }) => errors.length
                 )
                 if (!errorImportNodes.length) return
-                const lastError = errorImportNodes[errorImportNodes.length - 1].errors.pop()
+                const lastError =
+                    errorImportNodes[errorImportNodes.length - 1].errors.pop()
                 errorImportNodes.forEach(
                     ({ node, errors }) => errors.forEach(
                         error => context.report({
@@ -189,16 +225,14 @@ module.exports = {
                     node: errorImportNodes[errorImportNodes.length - 1].node,
                     message: getErrorMessage(lastError),
                     fix(fixer) {
-                        const range = [importNodes[0].node.range[0], fixRangeEnd]
-                        const resultSourceCode = `${sortedGroup.filter(
-                            group => group.length
-                        ).map(
+                        const range = [importNodes[0].node.range[0], insertRangeEnd]
+                        const resultSourceCode = `${sortedGroup.map(
                             group => `${group.map(
                                 ({ range }) => originSourceCode.slice(...range).replace(
                                     /^\s*/, '\n'
                                 )
-                            ).join('')}`
-                        ).join('\n').trim()}\n\n`
+                            ).join('')}${group[group.length - 1].seperator ? '\n' : ''}`
+                        ).join('').trim()}\n\n`
                         return [fixer.replaceTextRange(range, resultSourceCode)].concat(
                             errorImportNodes.filter(({ shouldRemove }) => shouldRemove)
                                 .map(({ range }) => fixer.removeRange(range))

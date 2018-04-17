@@ -19,7 +19,7 @@ import styled from 'styled-components'
 import { createStore, applyMiddleware, compose } from 'redux'
 import thunkMiddleware from 'redux-thunk'
 import Main from './module/main/component/Main'
-import {message, LocaleProvider} from 'antd'
+import { message, LocaleProvider } from 'antd'
 
 import { StorageKey } from '__res/R'
 import axios from 'axios'
@@ -37,7 +37,7 @@ import { createStore, applyMiddleware, compose } from 'redux'
 import { Provider } from 'react-redux'
 import thunkMiddleware from 'redux-thunk'
 import styled from 'styled-components'
-import {message, LocaleProvider} from 'antd'
+import { message, LocaleProvider } from 'antd'
 import axios from 'axios'
 
 import { StorageKey } from '__res/R'
@@ -54,6 +54,7 @@ const a = 1
     'Wrong placement.',
     'Wrong placement.',
     'Wrong placement.',
+    'shouldn\'t be followed by empty line(s)',
     'Wrong placement.',
     'Wrong placement.',
     'Should be followed by 1 empty line.',

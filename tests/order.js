@@ -33,7 +33,7 @@ const options = [
         [
             "/\\.css$/ | 9"
         ] 
-    ]
+    ], 0, 1
 ]
 
 const ruleTester = new RuleTester({
@@ -41,7 +41,7 @@ const ruleTester = new RuleTester({
     parser: 'babel-eslint'
 })
 
-const cases = Object.values(requireIndex(__dirname + '/orderBases'))
+const cases = Object.values(requireIndex(__dirname + '/cases'))
 
 ruleTester.run('test', rule, {
     valid: cases.map(_case => _case.valid)

@@ -12,7 +12,7 @@ const Access = () => <div></div>
 import axios from 'axios'
 import React from 'react'
 
-export default class Echarts extends React.Component {
+export default class Component extends React.Component {
     render() {
         return (
             <div></div>
@@ -24,7 +24,7 @@ export default class Echarts extends React.Component {
 import React from 'react'
 import axios from 'axios'
 
-export default class Echarts extends React.Component {
+export default class Component extends React.Component {
     render() {
         return (
             <div></div>
@@ -32,5 +32,5 @@ export default class Echarts extends React.Component {
     }
 }
 `,
-    3]
+    4]
 }
