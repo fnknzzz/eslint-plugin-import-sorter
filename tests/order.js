@@ -41,7 +41,7 @@ const ruleTester = new RuleTester({
     parser: 'babel-eslint'
 })
 
-const cases = Object.values(requireIndex(__dirname + '/cases'))
+const cases = Object.values(requireIndex(__dirname + '/orderBases'))
 
 ruleTester.run('test', rule, {
     valid: cases.map(_case => _case.valid)
@@ -50,13 +50,15 @@ ruleTester.run('test', rule, {
                 options
             })),
     invalid: cases.map(_case => _case.invalid)
-            .map(([code, output, messages]) => ({
-                code: code.trim(),
-                output: output.trim(),
-                errors: typeof messages === 'number'? messages : messages.map(message => ({
-                    message,
-                    type: 'ImportDeclaration'
-                })),
-                options
-            }))
+            .map(([code, output, messages]) => {
+                return ({
+                    code: code.trim(),
+                    output: output.trim(),
+                    errors: typeof messages === 'number'? messages : messages.map(message => ({
+                        message,
+                        type: 'ImportDeclaration'
+                    })),
+                    options
+                })
+            })
 })

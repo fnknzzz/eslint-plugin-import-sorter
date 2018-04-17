@@ -20,11 +20,12 @@
     },
     "homepage": "https://github.com/fengkfengk/import-sort-react-first#readme",
     "scripts": {
-        "build": "npx babel src --out-dir lib",
-        "pure-test": "mocha tests --recursive",
+        "prepublish": "npm run build",
         "pretest": "npm run build",
-        "test": "npm run pure-test && npm run lint",
-        "lint": "eslint src/rules --fix"
+        "build": "cross-env BABEL_ENV=production npx babel src --out-dir lib",
+        "test": "mocha tests --recursive",
+        "dev": "cross-env BABEL_ENV=dev npx babel src --out-dir lib && mocha tests --recursive && eslint src/rules",
+        "fix": "eslint src/rules --fix"
     },
     "dependencies": {
         "requireindex": "~1.1.0"
@@ -33,16 +34,20 @@
         "babel-cli": "^6.26.0",
         "babel-core": "^6.26.0",
         "babel-eslint": "^8.2.2",
-        "babel-preset-es2015": "^6.24.1",
+        "babel-preset-env": "^1.6.1",
         "babel-preset-stage-0": "^6.24.1",
+        "cross-env": "^5.1.4",
         "eslint": "^4.17.0",
         "eslint-config-airbnb-base": "^12.1.0",
         "eslint-plugin-babel": "^4.1.2",
         "eslint-plugin-import": "^2.9.0",
         "mocha": "^3.1.2"
     },
+    "peerDependencies": {
+        "eslint": "^4.0.0"
+    },
     "engines": {
-        "node": ">=0.10.0"
+        "node": ">=4.0.0"
     },
     "license": "ISC"
 }

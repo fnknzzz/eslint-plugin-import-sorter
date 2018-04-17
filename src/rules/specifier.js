@@ -58,6 +58,8 @@ module.exports = {
         },
         schema: [{
             type: 'string'
+        }, {
+            type: 'string'
         }],
         fixable: 'code'
     },
@@ -72,23 +74,13 @@ module.exports = {
                     specifiers = specifiers.slice(1)
                 }
                 const sorted = getSortedSpecifiers(specifiers, option, sourceCode)
-                let isWrong = false
-                for (let i = 0; i < sorted.length; i++) {
-                    if (sorted[i] !== specifiers[i]) {
-                        isWrong = true
-                        break
-                    }
-                }
-                if (isWrong) {
+                if (sorted.find((specifier, i) => specifier !== specifiers[i])) {
                     context.report({
                         message: 'Wrong specifiers order.',
                         node,
                         fix(fixer) {
-                            const specifiersText = sorted.map(
-                                specifier => sourceCode.getText(specifier)
-                            )
                             return specifiers.map(
-                                ({ range }) => fixer.replaceTextRange(range, specifiersText)
+                                ({ range }, i) => fixer.replaceTextRange(range, sourceCode.getText(sorted[i]))
                             )
                         }
                     })
