@@ -50,7 +50,7 @@ ruleTester.run('test', rule, {
                 options
             })),
     invalid: cases.map(_case => _case.invalid)
-            .map(([code, output, message]) => {
+            .map(([code, output, messages]) => {
                 return ({
                     code: code.trim(),
                     output: output.trim(),
