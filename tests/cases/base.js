@@ -54,9 +54,9 @@ const a = 1
     'Wrong placement.',
     'Wrong placement.',
     'Wrong placement.',
-    'shouldn\'t be followed by empty line(s)',
     'Wrong placement.',
     'Wrong placement.',
+    'Shouldn\'t be followed by empty line(s)',
     'Should be followed by 1 empty line.',
     'Wrong placement.',
 ]]

@@ -81,7 +81,7 @@ const normalizeOption = options => {
                     ({ matcher, priority } = option)
                 } else if (typeof option === 'string') {
                     [matcher, priority = 0] = option.split('|')
-                                                    .map(str => str.trim())
+                        .map(str => str.trim())
                 }
                 priority = parseInt(priority, 10)
                 if (isRegExpMatcher(matcher)) {
@@ -161,7 +161,7 @@ module.exports = {
                 if (!importNodes.length || !firstNotImpNode) return
 
                 const sortedGroup = getSortedImport(option, importNodes)
-                                        .filter(group => group.length)
+                    .filter(group => group.length)
                 const lastGroup = sortedGroup[sortedGroup.length - 1]
                 lastGroup[lastGroup.length - 1].seperator = true
                 markImportRank(sortedGroup)
