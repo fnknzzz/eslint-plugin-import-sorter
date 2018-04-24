@@ -33,7 +33,7 @@ const options = [
         [
             "/\\.css$/ | 9"
         ] 
-    ]
+    ], 0, 1
 ]
 
 const ruleTester = new RuleTester({
@@ -50,13 +50,15 @@ ruleTester.run('test', rule, {
                 options
             })),
     invalid: cases.map(_case => _case.invalid)
-            .map(([code, output, messages]) => ({
-                code: code.trim(),
-                output: output.trim(),
-                errors: typeof messages === 'number'? messages : messages.map(message => ({
-                    message,
-                    type: 'ImportDeclaration'
-                })),
-                options
-            }))
+            .map(([code, output, messages]) => {
+                return ({
+                    code: code.trim(),
+                    output: output.trim(),
+                    errors: typeof messages === 'number'? messages : messages.map(message => ({
+                        message,
+                        type: 'ImportDeclaration'
+                    })),
+                    options
+                })
+            })
 })
