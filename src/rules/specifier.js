@@ -3,20 +3,11 @@ const formatOption = options => {
         order: 'byName',
         firstType: 'namespace'
     }
-    switch (options.length) {
-        case 1:
-            if (typeof options[0] === 'string') {
-                settings.order = options[0]
-            } else {
-                return options[0]
-            }
-            break
-        case 2:
-            settings.order = options[0]
-            settings.firstType = options[1]
-            break
-        default:
-            // no default
+    if (options.includes('byUsingOrder')) {
+        settings.order = 'byUsingOrder'
+    }
+    if (options.includes('default')) {
+        settings.firstType = 'default'
     }
     return settings
 }
