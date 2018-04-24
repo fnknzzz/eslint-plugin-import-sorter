@@ -1,3 +1,5 @@
+[![build status](https://travis-ci.org/fengkfengk/eslint-plugin-import-sorter.svg?branch=master)](https://travis-ci.org/fengkfengk/eslint-plugin-import-sorter)
+
 # eslint-plugin-import-sorter
 
 Auto fix the imports beginning in files.
